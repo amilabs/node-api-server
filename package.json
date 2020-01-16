@@ -10,14 +10,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/timophey01/node-dummy-service.git"
+    "url": "git+https://github.com/amilabs/node-api-server.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/timophey01/node-dummy-service/issues"
+    "url": "https://github.com/amilabs/node-api-server/issues"
   },
-  "homepage": "https://github.com/timophey01/node-dummy-service#readme",
+  "homepage": "https://github.com/amilabs/node-api-server#readme",
   "dependencies": {
     "ajv": "6.10.2",
     "bluebird": "^3.7.2",
