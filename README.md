@@ -1,1 +1,1 @@
-# node-api-server
+# node-dummy-service
