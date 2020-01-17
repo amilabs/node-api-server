@@ -10,9 +10,7 @@ function initRedis({ host, port }) {
 }
 
 function initMultiRedis(redisList) {
-    return mapValues(redisList, params => {
-        return initRedis(params);
-    });
+    return mapValues(redisList, params => initRedis(params));
 }
 
 module.exports = { initRedis, initMultiRedis };

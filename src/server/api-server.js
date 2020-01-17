@@ -18,7 +18,6 @@ const httpServerLogEvent = {
 
 const MONGO_RECONNECT_INTERVAL = 1000;
 
-
 class ApiServer {
     constructor(config, logger, metric) {
         initMetric(config.metric || {});
@@ -296,13 +295,13 @@ class ApiServer {
         });
     }
 
-    async start(port) {
+    async start(port, host = '0.0.0.0') {
         this.logger.info('starting server...');
         const res = await this.beforeStart();
         this.logger.debug('in start', res);
         writeSingleMetric(`service.${process.pid}.start`, 1);
         return new Promise((resolve, reject) => {
-            this.app.listen(port, (err, info) => {
+            this.app.listen(port, host, (err, info) => {
                 if (err) {
                     return reject(err);
                 }

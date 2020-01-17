@@ -1,4 +1,4 @@
-const { objectWrapMetric } = require('metric');
+const { fromPairs } = require('lodash');
 
 async function delayer(delay) {
     return Promise((resolve) => {
@@ -51,23 +51,6 @@ function headerToParams(headersPath = 'headers', headerList = []) {
             [headersPath]: fromPairs(headerList.map(headerName => [headerName, req.header(headerName)]))
         };
     };
-}
-
-function getMetricWrappedCollection(
-    constructor,
-    collectionName,
-    mongoDb,
-    methodList = metricMethodList,
-    prefix = `mongodb.${camelCaseToKebab(collectionName)}_collection`) {
-
-}
-
-function getLogWrappedCollection(
-    collection,
-    logger,
-    methodMap = methodMap
-) {
-
 }
 
 function getMetricPathREST(prefix) {

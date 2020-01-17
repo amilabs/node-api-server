@@ -1,0 +1,36 @@
+swagger: '2.0'
+host: 'localhost:8000'
+info:
+  version: 0.0.1
+  title: Hello world
+  termsOfService: 'http://swagger.io/terms/'
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+schemes:
+  - http
+paths:
+  /health-check:
+    get:
+      summary: Health check controller
+      operationId: healthCheck
+      parameters: []
+      responses:
+        '200':
+          description: Successful operation
+        '500':
+          description: Internal error
+  '/hello-world':
+    get:
+      summary: Hello world
+      description: return hello world
+      operationId: helloWorld
+      produces:
+        - application/json
+      parameters: []
+      responses:
+        '200':
+          description: successful operation
+        '500':
+          description: Internal error
+definitions: {}

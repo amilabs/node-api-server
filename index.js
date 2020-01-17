@@ -1,8 +1,18 @@
+const server = require('./src/server');
+const validators = require('./src/validators');
+const mongo = require('./src/mongo');
+const redis = require('./src/redis');
+const utils = require('./src/utils');
+const { initMetric } = require('metric');
+const { initLogger } = require('logger');
+
 
 module.exports = {
-    ...require('./src/server'),
-    validators: require('./src/validators'),
-    mongo: require('./src/mongo'),
-    redis: require('./src/redis'),
-    utils: require('./src/utils')
+    ...server,
+    initMetric,
+    initLogger,
+    validators,
+    mongo,
+    redis,
+    utils
 };
