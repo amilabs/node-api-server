@@ -1,0 +1,45 @@
+{
+  "name": "api-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha tests/**/*.js",
+    "lint": "eslint index.js ./src --ext js",
+    "lint-fix": "eslint ./src --ext js --fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/amilabs/node-api-server.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/amilabs/node-api-server/issues"
+  },
+  "homepage": "https://github.com/amilabs/node-api-server#readme",
+  "dependencies": {
+    "ajv": "6.10.2",
+    "bluebird": "^3.7.2",
+    "config": "3.2.3",
+    "cors": "2.8.5",
+    "express": "4.17.1",
+    "lodash": "4.17.15",
+    "logger": "https://github.com/amilabs/node-logger.git",
+    "metric": "https://github.com/amilabs/node-metrics.git",
+    "mongodb": "3.3.3",
+    "redis": "2.8.0",
+    "swagger-express-middleware": "2.0.3",
+    "uuid": "3.3.3"
+  },
+  "devDependencies": {
+    "babel-eslint": "10.0.1",
+    "eslint": "4.19.1",
+    "eslint-config-airbnb": "16.1.0",
+    "eslint-plugin-import": "2.14.0",
+    "eslint-plugin-jsx-a11y": "6.1.2",
+    "eslint-plugin-meteor": "5.1.0",
+    "eslint-plugin-react": "7.12.3",
+    "mocha": "6.2.1"
+  }
+}

@@ -1,0 +1,10 @@
+swaggerPath: ../schema/swagger/api.yaml
+metric:
+  metricPrefix: counter-reader
+  isDebug: true
+logger:
+  level: debug
+  transports:
+    - type: Console
+app:
+  port: 8000
