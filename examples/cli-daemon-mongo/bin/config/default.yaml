@@ -1,0 +1,12 @@
+metric:
+  metricPrefix: test-cli
+  isDebug: true
+logger:
+  level: debug
+  transports:
+    - type: Console
+mongodb:
+  uri: mongodb://localhost:27017/test
+  dbName: test
+  initCollections: false
+  initIndexes: false
