@@ -6,7 +6,17 @@ async function delayer(delay) {
     });
 }
 
-const metricMethodList = ['findOne', 'upsert', 'updateOne', 'insertOne', 'insertMany', 'find', 'aggregate', 'count'];
+const metricMethodList = [
+    'findOne',
+    'upsert',
+    'updateOne',
+    'insertOne',
+    'insertMany',
+    'find',
+    'aggregate',
+    'count',
+    'upsertMany'
+];
 
 const logMethodList = {
     findOne: 'debug',
@@ -15,7 +25,8 @@ const logMethodList = {
     aggregate: 'debug',
     count: 'debug',
     insertOne: 'debug',
-    find: 'debug'
+    find: 'debug',
+    upsertMany: 'debug'
 };
 
 function uriToMetricPath(uri) {

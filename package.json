@@ -24,10 +24,12 @@
     "config": "3.2.3",
     "cors": "2.8.5",
     "express": "4.17.1",
+    "lockfile": "^1.0.4",
     "lodash": "4.17.15",
     "logger": "https://github.com/amilabs/node-logger.git",
     "metric": "https://github.com/amilabs/node-metrics.git",
     "mongodb": "3.3.3",
+    "optimist": "^0.6.1",
     "redis": "2.8.0",
     "swagger-express-middleware": "2.0.3",
     "uuid": "3.3.3"

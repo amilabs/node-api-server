@@ -14,7 +14,9 @@ function mongoInit(config, logger = undefined, indexesList = {}, collectionList 
     let mongoClient;
     return new Promise((resolve, reject) => {
         MongoClient.connect(config.mongodb.uri, async (err, client) => {
-            logger.debug('[Init mongodb] connected');
+            if (logger) {
+                logger.debug('[Init mongodb] connected');
+            }
             if (err) {
                 return reject(err);
             }
@@ -26,13 +28,17 @@ function mongoInit(config, logger = undefined, indexesList = {}, collectionList 
                     logger.logEvent(mongoDb, mongoLogEvents);
                 }
                 if (config.mongodb.initCollections) {
-                    logger.debug('[Init mongodb] Init collections');
+                    if (logger) {
+                        logger.debug('[Init mongodb] Init collections');
+                    }
                     await Promise.all(Object.keys(collectionList)
                         .map(async collectionName =>
                             (mongoDb.createCollection(collectionName, collectionList[collectionName]))));
                 }
                 if (config.mongodb.initIndexes) {
-                    logger.debug('Init indexes');
+                    if (logger) {
+                        logger.debug('Init indexes');
+                    }
                     await Promise.all(Object.keys(indexesList).map(async (collectionName) => {
                         const collection = mongoDb.collection(collectionName);
                         return Promise.all(indexesList[collectionName]

@@ -3,15 +3,18 @@ const validators = require('./src/validators');
 const mongo = require('./src/mongo');
 const redis = require('./src/redis');
 const utils = require('./src/utils');
-const { initMetric } = require('metric');
+const metric = require('metric');
+const cli = require('./src/cli');
 const { initLogger } = require('logger');
 
 
 module.exports = {
     ...server,
-    initMetric,
+    initMetric: metric.initMetric,
+    metric,
     initLogger,
     validators,
+    cli,
     mongo,
     redis,
     utils
