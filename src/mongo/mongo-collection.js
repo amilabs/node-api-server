@@ -22,6 +22,12 @@ class MongoCollection {
         }
     }
 
+    async upsertMany(records, findKeys = this.uniqueKeys) {
+        const bulk = this.collection.initializeUnorderedBulkOp({ useLegacyOps: true });
+        records.forEach(record => bulk.find(_.pick(record, findKeys)).upsert().updateOne(record));
+        return bulk.execute();
+    }
+
     async upsert(data) {
         if (this.uniqueKeys.length) {
             const selector = _.pick(data, this.uniqueKeys);

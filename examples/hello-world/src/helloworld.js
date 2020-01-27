@@ -1,9 +1,16 @@
+let api;
+try {
+    api = require('../../../index'); // eslint-disable-line
+} catch (e) {
+    api = require('api-server'); // eslint-disable-line
+}
+
 const {
     ApiServer,
     utils: {
         getMetricPathREST
     }
-} = require('api-server');
+} = api;
 
 const routes = [{
     path: '/hello-world',

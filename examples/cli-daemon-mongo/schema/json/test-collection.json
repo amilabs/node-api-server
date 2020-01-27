@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "properties": {
+    "_id": {
+      "type": "string",
+      "description": "Mongo ObjectId"
+    },
+    "key1": {
+      "type": "string",
+      "description": "Counter key"
+    },
+    "key2": {
+      "type": "number",
+      "description": "time rounded by minutes"
+    },
+    "key3": {
+      "type": "string"
+    },
+    "key4": {
+      "type": "object"
+    }
+  },
+  "additionalProperties": false
+}
