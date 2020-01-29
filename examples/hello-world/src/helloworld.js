@@ -7,6 +7,7 @@ try {
 
 const {
     ApiServer,
+    initLogger, initMetric,
     utils: {
         getMetricPathREST
     }
@@ -57,4 +58,4 @@ class HelloWorld extends ApiServer {
     }
 }
 
-module.exports = { HelloWorld };
+module.exports = { HelloWorld, initLogger, initMetric };
