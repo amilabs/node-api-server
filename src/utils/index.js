@@ -9,6 +9,7 @@ async function delayer(delay) {
 const metricMethodList = [
     'findOne',
     'upsert',
+    'update',
     'updateOne',
     'insertOne',
     'insertMany',
@@ -21,6 +22,7 @@ const metricMethodList = [
 const logMethodList = {
     findOne: 'debug',
     upsert: 'debug',
+    update: 'debug',
     updateOne: 'debug',
     aggregate: 'debug',
     count: 'debug',
