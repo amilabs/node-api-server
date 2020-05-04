@@ -46,7 +46,7 @@ class MongoCollection {
     }
 
     async update(selector, updateOperator) {
-        return this.collection.update(selector, updateOperator);
+        return this.collection.updateMany(selector, updateOperator);
     }
 
     async insertOne(data) {
