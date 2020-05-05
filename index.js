@@ -4,9 +4,9 @@ const mongo = require('./src/mongo');
 const redis = require('./src/redis');
 const utils = require('./src/utils');
 const { HttpClient } = require('./src/http-client');
-const metric = require('metric');
+const metric = require('@timophey01/metric');
 const cli = require('./src/cli');
-const { initLogger } = require('logger');
+const { initLogger } = require('@timophey01/logger');
 
 
 module.exports = {

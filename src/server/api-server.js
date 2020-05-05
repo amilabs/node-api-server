@@ -3,14 +3,14 @@ const createMiddleware = require('swagger-express-middleware');
 const _ = require('lodash');
 const uuid4 = require('uuid/v4');
 const cors = require('cors');
-const { writeTime, writeSingleMetric } = require('metric');
+const { writeTime, writeSingleMetric } = require('@timophey01/metric');
 const { Validator } = require('../validators/validator');
 const { getMetricPathREST, camelCaseToKebab } = require('../utils');
 const ValidationError = require('../validators/error');
 const ResourceUnavailableError = require('./resource-error');
 const MongoValidationError = require('../mongo/errors/validation');
 const { mongoInit } = require('../mongo/mongo-init');
-const { initMetric } = require('metric');
+const { initMetric } = require('@timophey01/metric');
 
 const httpServerLogEvent = {
     close: 'info',
