@@ -50,7 +50,7 @@ function inurlParams(inurlPath = 'inurl') {
     };
 }
 
-// TODO rederect ip add here
+// TODO redirect ip add here
 function ipToParams(ipPath = 'ip') {
     return (req) => {
         req.body = { ...req.body, [ipPath]: req.ip };
