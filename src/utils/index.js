@@ -50,6 +50,12 @@ function inurlParams(inurlPath = 'inurl') {
     };
 }
 
+function inqueryParams(inqueryPath = 'inquery') {
+    return (req) => {
+        req.body = { ...req.body, [inqueryPath]: req.query || {} };
+    };
+}
+
 // TODO redirect ip add here
 function ipToParams(ipPath = 'ip') {
     return (req) => {
@@ -76,6 +82,7 @@ module.exports = {
     inurlParams,
     headerToParams,
     ipToParams,
+    inqueryParams,
     camelCaseToKebab,
     metricMethodList,
     logMethodList
