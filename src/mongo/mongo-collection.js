@@ -63,8 +63,8 @@ class MongoCollection {
         return this.collection.insertMany(data);
     }
 
-    async aggregate(pipline) {
-        return this.collection.aggregate(pipline).toArray();
+    async aggregate(pipline, options = {}) {
+        return this.collection.aggregate(pipline, options).toArray();
     }
 
     async find(selector, limit = 100, order = undefined, skip = 0) {

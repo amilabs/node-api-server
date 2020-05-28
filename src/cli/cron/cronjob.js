@@ -5,35 +5,45 @@ const { initMetric, getStartedTimer } = require('@timophey01/metric');
 
 const DEFAULT_LOCK_RETRY_COUNT = 3;
 
-const DEFAULT_LOCK_DIR_NAME = './.locks';
-
 class CronJob {
     constructor(args, options) {
         const filename = __filename.split('/');
-        this.name = options.name || filename[filename.length - 2];
+        this.name = options.name || filename[filename.length - 1].replace(/./, '_');
         this.options = options;
         this.args = args;
-        this.hostname = options.hostname || os.hostname();
-        this.logger = initLogger(options.logger || {
+        this.hostname = options.hostname || os.hostname().split('.')[0];
+    }
+
+    async initBase() {
+        this.logger = initLogger(this.options.logger || {
             level: 'debug',
             transports: [{ type: 'Console' }]
         });
         this.metric = initMetric({
-            metricPrefix: `${this.hostname}.${this.name}`,
-            ...(options.metric || {})
+            metricPrefix: `${this.hostname}.crons.${this.name}`,
+            ...(this.options.metric || {})
         });
-    }
-
-    getLockFilename() {
-        return `${this.options.lock.dirname || DEFAULT_LOCK_DIR_NAME}/${this.options.lock.filename
-            || `${this.name}.lock`}`;
+        return Promise.resolve();
     }
 
     async lock() {
+        if (!this.options.lock) {
+            return Promise.resolve();
+        }
+        this.options.lock = {
+            dir: `${this.options.lock.dirname || '.'}/.locks`,
+            filename: `${this.name}.lock`,
+            ...this.options.lock,
+            opt: {
+                retries: DEFAULT_LOCK_RETRY_COUNT,
+                ...(this.options.lock.opt || {})
+            }
+        };
+
         return new Promise((resolve, reject) => {
             lockFile.lock(
-                this.getLockFilename(),
-                { retries: DEFAULT_LOCK_RETRY_COUNT, ...(this.options.lock.opt || {}) },
+                `${this.options.lock.dir}/${this.options.lock.filename}`,
+                this.options.lock.opt,
                 (err) => {
                     if (err) {
                         return reject(err);
@@ -49,7 +59,7 @@ class CronJob {
             return Promise.resolve();
         }
         return new Promise((resolve, reject) => {
-            lockFile.unlock(this.getLockFilename(), (err) => {
+            lockFile.unlock(`${this.options.lock.dir}/${this.options.lock.filename}`, (err) => {
                 if (err) {
                     return reject(err);
                 }
@@ -71,12 +81,14 @@ class CronJob {
     }
 
     async run() {
+        await this.initBase();
         const timer = getStartedTimer('run');
         try {
             await this.lock();
         } catch (e) {
             this.logger.warn(e.toString());
             timer.send('lock');
+            throw e;
         }
         try {
             await this.init();
