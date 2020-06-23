@@ -213,7 +213,7 @@ class ApiServer {
         return (err, req, res, next) => {
             if (err) {
                 this.getLogger(res).sendError(err);
-                if (customHandler.bind(this)(err)) {
+                if (customHandler(err, req, res)) {
                     next(err);
                 }
                 if (err.status) {
