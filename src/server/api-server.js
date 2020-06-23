@@ -209,10 +209,13 @@ class ApiServer {
         });
     }
 
-    errorHandlingMiddleware() {
+    errorHandlingMiddleware(customHandler = () => false) {
         return (err, req, res, next) => {
             if (err) {
                 this.getLogger(res).sendError(err);
+                if (customHandler.bind(this)(err)) {
+                    next(err);
+                }
                 if (err.status) {
                     this.sendError(res, err.status, err.message || '', {});
                     return next(err);
