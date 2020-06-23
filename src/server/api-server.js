@@ -214,7 +214,7 @@ class ApiServer {
             if (err) {
                 this.getLogger(res).sendError(err);
                 if (customHandler(err, req, res)) {
-                    next(err);
+                    return next(err);
                 }
                 if (err.status) {
                     this.sendError(res, err.status, err.message || '', {});
