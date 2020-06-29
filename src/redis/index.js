@@ -1,5 +1,6 @@
 const { TimeCounters } = require('./timecounters');
 const { Queue } = require('./queue');
+const { TimeLimitsQueue } = require('./time-limit-queue/queue');
 
 
 const { mapValues } = require('lodash');
@@ -20,6 +21,7 @@ function initMultiRedis(redisList) {
 module.exports = {
     initRedis,
     initMultiRedis,
+    TimeLimitsQueue,
     TimeCounters,
     Queue
 };

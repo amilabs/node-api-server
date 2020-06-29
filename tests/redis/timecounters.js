@@ -26,16 +26,23 @@ class RedisMultyMock {
 
 class RedisMock {
     constructor() {
-        this.hincrbyAsyncFunc = () => {};
+        this.hincrbyAsyncFunc = () => true;
         this.hincrbyAsyncCnt = 0;
-        this.hgetallAsyncFunc = () => {};
+        this.hgetallAsyncFunc = () => ({});
         this.hgetallAsyncCnt = 0;
+        this.expireAsyncFunc = () => true;
+        this.expireAsyncCnt = 0;
         this.multiCnt = 0;
     }
 
     async hincrbyAsync(...args) {
         this.hincrbyAsyncCnt++;
         return this.hincrbyAsyncFunc(...args);
+    }
+
+    async expireAsync(...args) {
+        this.expireAsyncCnt++;
+        return this.expireAsyncFunc(...args);
     }
 
     async hgetallAsync(...args) {
@@ -67,13 +74,13 @@ describe('TimeCounters', () => {
             const timeCounter = new TimeCounters(new RedisMock(), 'test', { limits, isIncrementFirst });
             const KEY = 'key';
             const res = await timeCounter.checkAndIncrement(KEY);
-            assert.strictEqual(res, true);
+            assert.strictEqual(res, 0);
         });
 
         it('should return false if minute limit is exceeded', async () => {
             const redis = new RedisMock();
             const now = parseInt(Date.now() / 1000, 10)
-            redis.hgetallAsyncFunc = () => ({ [now]: redis.hgetallAsyncCnt });
+            redis.hgetallAsyncFunc = () => ({ [now]: redis.hgetallAsyncCnt / 2 });
             const limits = {
                 60: 3,
                 3600: 30
@@ -82,11 +89,11 @@ describe('TimeCounters', () => {
             const timeCounter = new TimeCounters(redis, 'test', { limits, isIncrementFirst, getNow: () => now });
             const KEY = 'key';
             let res = await timeCounter.checkAndIncrement(KEY);
-            assert.strictEqual(res, true);
+            assert.strictEqual(res, 0);
             res = await timeCounter.checkAndIncrement(KEY);
-            assert.strictEqual(res, true);
+            assert.strictEqual(res, 0);
             res = await timeCounter.checkAndIncrement(KEY);
-            assert.strictEqual(res, false);
+            assert.strictEqual(res, 60);
         });
 
 
@@ -104,7 +111,7 @@ describe('TimeCounters', () => {
             const timeCounter = new TimeCounters(redis, 'test', { limits, isIncrementFirst, getNow: () => now });
             const KEY = 'key';
             const res = await timeCounter.checkAndIncrement(KEY);
-            assert.strictEqual(res, false);
+            assert.strictEqual(res, 3600 - 62);
         });
     });
 

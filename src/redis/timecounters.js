@@ -6,7 +6,7 @@ class TimeCounters {
     constructor(redis, prefix, options = {}) {
         this.redisInstance = redis;
         this.prefix = prefix;
-        this.isIncrementFirst = options.isIncrementFirst !== false;
+        this.isIncrementFirst = !(options.isIncrementFirst === false);
         this.rollupPeriods = options.isIncrementFirst || {
             ignore: 60,
             rollup: [
@@ -27,41 +27,67 @@ class TimeCounters {
             3600: 1000
         };
         this.parallelKeyRollupChunkSize = options.parallelKeyRollupChunkSize || PARALLEL_KEYS_ROLLUP;
+        this.rollupOnIncrement = options.rollupOnIncrement !== false;
         this.options = options;
     }
-
 
     getCounterKey(key) {
         return `${this.prefix}:counters:${key}`;
     }
 
+    async incrementKey(key, time, count = 1) {
+        return Promise.all([
+            this.redisInstance.hincrbyAsync(key, time, count),
+            this.redisInstance.expireAsync(key, this.expireKeyTime)
+        ]);
+    }
+
+    async check(redisCounterKey, overflowConst = 0) {
+        const now = this.getNow();
+        const counters = (await this.redisInstance.hgetallAsync(redisCounterKey)) || {};
+        return Math.max(...Object.entries(this.limits).map(([interval, limit]) => {
+            const countersForInterval = Object.entries(counters)
+                .filter(([time]) => now - time < interval);
+            if (countersForInterval.reduce((res, [, count]) => res - count, limit) < overflowConst) {
+                return Math.min(...countersForInterval.map(([time]) => interval - (now - time)));
+            }
+            return 0;
+        }));
+    }
+
+    /**
+     *
+     * @param key
+     * @returns {Promise<number>}
+     */
     async checkAndIncrement(key) {
         const now = this.getNow();
+        await this._rollupKey(key);
+        const redisCounterKey = this.getCounterKey(key);
         let overflowConst = 1;
         if (this.isIncrementFirst) {
             overflowConst = 0;
-            await this.redisInstance.hincrbyAsync(this.getCounterKey(key), now, 1);
+            await this.incrementKey(redisCounterKey, now);
         }
-        const counters = await this.redisInstance.hgetallAsync(this.getCounterKey(key));
-        const limits = _.clone(this.limits);
-        for (const time in counters) {
-            for (const limit in limits) {
-                if (now - time < limit) {
-                    limits[limit] = limits[limit] - counters[time];
-                }
-                if (limits[limit] < overflowConst) {
-                    if (this.isIncrementFirst) {
-                        await this.redisInstance.hincrbyAsync(this.getCounterKey(key), now, -1);
-                    }
-                    return false;
-                }
-            }
+        const delay = await this.check(redisCounterKey, overflowConst);
+
+        if (delay && this.isIncrementFirst) {
+            await this.incrementKey(redisCounterKey, now, -1);
         }
         if (!this.isIncrementFirst) {
-            await this.redisInstance.hincrbyAsync(this.getCounterKey(key), now, 1);
+            await this.incrementKey(redisCounterKey, now);
         }
-        return true;
+        return delay;
     }
+
+    /**
+     * Potential time counters can be negative but it should be work anyway.
+     * @param key
+     */
+    async decrementLast(key) {
+        return this.incrementKey(this.getCounterKey(key), this.getNow(), -1);
+    }
+
 
     async rollup(keys = []) {
         const keysChunks = _.chunk(keys, this.parallelKeyRollupChunkSize);

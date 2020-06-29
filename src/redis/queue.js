@@ -1,19 +1,36 @@
 const BullQueue = require('bull');
 
 class Queue {
-    constructor(options) {
-        this.redis = options.redis;
-        this.name = options.name;
-        this.queueOptions = options.queueOptions || {};
-        this.instance = new BullQueue(this.name, this.redis, this.queueOptions);
+    constructor(name, redis, options) {
+        this.redis = redis;
+        this.name = name;
+        this.concurency = options.concurency || 1;
+        this.queueOptions = options.queueOptions || {
+            redis
+        };
+        this.processCallback = options.processCallback ? options.processCallback.bind(this) : null;
+        this.instance = new BullQueue(this.name, this.queueOptions);
+        this.instance.process('__default__', this.concurency, job => this.process(job));
     }
 
-    add(data) {
-        return this.instance.add(data);
+    async delayQueue(time) {
+        await this.instance.pause(false, true);
+        return Promise(resolve => setTimeout(() => resolve(this.instance.resume()), time));
     }
 
-    process(callcack) {
-        return this.instance.process(callcack);
+    async add(...args) {
+        return this.instance.add(...args);
+    }
+
+    setProcessCallback(callback) {
+        this.processCallback = callback.bind(this);
+    }
+
+    process(...args) {
+        if (this.processCallback) {
+            return this.processCallback(...args);
+        }
+        throw Error('Job processing not implemented');
     }
 }
 
