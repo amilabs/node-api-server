@@ -59,8 +59,8 @@ class ApiServer {
             indexesList,
             collectionList
         ).then(({ mongoDb, mongoClient }) => {
-            mongoClient.on('close', () => setTimeout(() => {
-                writeSingleMetric(`mongo.${process.pid}.close`, 1);
+            mongoDb.on('close', () => setTimeout(() => {
+                writeSingleMetric(`mongodb.${process.pid}.close`, 1);
                 this.initMongoResources(true).catch(e => this.logger.sendError(e));
             }, MONGO_RECONNECT_INTERVAL));
             this.resources = {
