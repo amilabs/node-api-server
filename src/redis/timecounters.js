@@ -91,8 +91,8 @@ class TimeCounters {
 
     async rollup(keys = []) {
         const keysChunks = _.chunk(keys, this.parallelKeyRollupChunkSize);
-        for (const chunk of keysChunks) {
-            await Promise.all(chunk.map(key => this._rollupKey(key)));
+        for (const chunk of keysChunks) { // eslint-disable-line no-restricted-syntax
+            await Promise.all(chunk.map(key => this._rollupKey(key))); // eslint-disable-line no-await-in-loop
         }
     }
 
@@ -106,7 +106,7 @@ class TimeCounters {
                 if (now - time < this.rollupPeriods.ignore) {
                     return 'ignore';
                 }
-                for (const { lt, period } of this.rollupPeriods.rollup) {
+                for (const { lt, period } of this.rollupPeriods.rollup) { // eslint-disable-line no-restricted-syntax
                     if (now - time < lt) {
                         return parseInt(time / period, 10) * period;
                     }

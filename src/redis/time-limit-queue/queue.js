@@ -14,9 +14,7 @@ class TimeLimitsQueue extends Queue {
             ...(options.queueOptions || {}),
             settings: {
                 backoffStrategies: {
-                    delayable: (attemptsMade, err) => {
-                        return this.backoffDelayableStrategy(attemptsMade, err);
-                    }
+                    delayable: (attemptsMade, err) => this.backoffDelayableStrategy(attemptsMade, err)
                 }
             }
         };

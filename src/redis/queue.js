@@ -15,7 +15,7 @@ class Queue {
 
     async delayQueue(time) {
         await this.instance.pause(false, true);
-        return Promise(resolve => setTimeout(() => resolve(this.instance.resume()), time));
+        return new Promise(resolve => setTimeout(() => resolve(this.instance.resume()), time));
     }
 
     async add(...args) {
