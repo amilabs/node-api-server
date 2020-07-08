@@ -5,7 +5,8 @@ class Queue {
         this.redis = redis;
         this.name = name;
         this.concurency = options.concurency || 1;
-        this.queueOptions = options.queueOptions || {
+        this.queueOptions = {
+            ...(options.queueOptions || {}),
             redis
         };
         this.processCallback = options.processCallback ? options.processCallback.bind(this) : null;
