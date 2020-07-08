@@ -84,7 +84,7 @@ class TimeLimitsQueue extends Queue {
         if (err instanceof DelayPeriod) {
             return err.delay;
         }
-        if (attemptsMade >= this.realAttempt || err instanceof FailForce) {
+        if (attemptsMade >= this.realAttemptCount || err instanceof FailForce) {
             return -1;
         }
         return 0;
