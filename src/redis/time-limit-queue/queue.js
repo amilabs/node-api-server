@@ -1,10 +1,13 @@
 const { Queue } = require('../queue');
+const { fromPairs } = require('lodash');
 
 class DelayPeriod {
     constructor(delay) {
         this.delay = delay;
     }
 }
+
+const GLOBAL_COUNTERS_KEY = 'global';
 
 class FailForce {}
 
@@ -20,12 +23,18 @@ class TimeLimitsQueue extends Queue {
         };
         super(name, redis, options);
         this.realAttemptCount = options.attemptCount || 1;
+        /**
+         * @var TimeCounters
+         */
         this.globalLimit = limits.global;
+        /**
+         * @var TimeCounters[]
+         */
         this.perJobLimits = limits.perJob;
     }
 
     async add(job, opt) {
-        const delay = await this.globalLimit.checkAndIncrement('global');
+        const delay = await this.globalLimit.checkAndIncrement(GLOBAL_COUNTERS_KEY);
         if (delay) {
             return this.delayQueue(delay * 1000);
         }
@@ -37,6 +46,26 @@ class TimeLimitsQueue extends Queue {
                 type: 'delayable'
             }
         });
+    }
+
+    async getAllCounters(job) {
+        return Promise.all([
+            this.globalLimit.getCounters(GLOBAL_COUNTERS_KEY),
+            ...this.perJobLimits.map(async ({
+                timeCounter, getIdFunc, dropCondition, name }) => {
+                const id = getIdFunc(job);
+                return {
+                    name,
+                    counters: await timeCounter.getCounterKey(id),
+                    id,
+                    timeCounter,
+                    dropCondition
+                };
+            })
+        ]).then(([global, ...perJobs]) => ({
+            global,
+            ...fromPairs(perJobs.map(counter => [counter.name, counter]))
+        }));
     }
 
     /**
