@@ -61,7 +61,9 @@ class ApiServer {
         ).then(({ mongoDb, mongoClient }) => {
             mongoDb.on('close', () => setTimeout(() => {
                 writeSingleMetric(`mongodb.${process.pid}.close`, 1);
-                this.initMongoResources(true).catch(e => this.logger.sendError(e));
+                if (!this.isStoping) {
+                    this.initMongoResources(true).catch(e => this.logger.sendError(e));
+                }
             }, MONGO_RECONNECT_INTERVAL));
             this.resources = {
                 ...this.resources,
@@ -292,7 +294,7 @@ class ApiServer {
 
     async afterFinish() {
         return new Promise((resolve) => {
-            this.app.close(() => {
+            this.server.close(() => {
                 resolve();
             });
         });
@@ -304,7 +306,7 @@ class ApiServer {
         this.logger.debug('in start', res);
         writeSingleMetric(`service.${process.pid}.start`, 1);
         return new Promise((resolve, reject) => {
-            this.app.listen(port, host, (err, info) => {
+            this.server = this.app.listen(port, host, (err, info) => {
                 if (err) {
                     return reject(err);
                 }
@@ -314,6 +316,7 @@ class ApiServer {
     }
 
     async stop() {
+        this.isStoping = true;
         writeSingleMetric(`service.${process.pid}.stop`, 1);
         return this.afterFinish();
     }

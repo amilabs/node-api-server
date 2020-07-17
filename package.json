@@ -20,7 +20,7 @@
   "homepage": "https://github.com/amilabs/node-api-server#readme",
   "dependencies": {
     "@timophey01/logger": "1.0.0",
-    "@timophey01/metric": "1.0.0",
+    "@timophey01/metric": "1.0.1",
     "agentkeepalive": "4.1.2",
     "ajv": "6.10.2",
     "bluebird": "3.7.2",

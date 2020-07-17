@@ -9,7 +9,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "api-server": "1.*.*",
     "config": "3.2.4",
-    "api-server": "https://github.com/timophey01/node-api-server.git"
+    "wtfnode": "0.8.1"
   }
 }

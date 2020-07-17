@@ -14,6 +14,10 @@ class Queue {
         this.instance.process('__default__', this.concurency, job => this.process(job));
     }
 
+    async stop() {
+        return this.instance.close();
+    }
+
     async delayQueue(time) {
         await this.instance.pause(false, true);
         return new Promise(resolve => setTimeout(() => resolve(this.instance.resume()), time));
