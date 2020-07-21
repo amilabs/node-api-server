@@ -7,7 +7,7 @@ class TimeCounters {
         this.redisInstance = redis;
         this.prefix = prefix;
         this.isIncrementFirst = !(options.isIncrementFirst === false);
-        this.rollupPeriods = options.isIncrementFirst || {
+        this.rollupPeriods = options.rollupPeriods || {
             ignore: 60,
             rollup: [
                 {
@@ -20,7 +20,8 @@ class TimeCounters {
                 }
             ]
         };
-        this.expireKeyTime = options.expireKeyTime || Math.max(...this.rollupPeriods.rollup.map(({ lt }) => lt));
+        this.expireKeyTime = options.expireKeyTime
+            || Math.max(...this.rollupPeriods.rollup.map(({ lt }) => lt));
         this.getNow = options.getNow || (() => parseInt(Date.now() / 1000, 10));
         this.limits = options.limits || {
             60: 100,
@@ -78,6 +79,21 @@ class TimeCounters {
             await this.incrementKey(redisCounterKey, now);
         }
         return delay;
+    }
+
+    async getCounters(key) {
+        const now = this.getNow();
+        const redisCountKey = this.getCounterKey(key);
+        const counters = await this.redisInstance.hgetallAsync(redisCountKey);
+        return _(counters)
+            .toPairs()
+            .reduce((results, [time, count]) => _.mapValues((limit, period) => {
+                if (now - time < period) {
+                    return limit - count;
+                }
+                return limit;
+            }), _.clone(this.limits))
+            .value();
     }
 
     /**

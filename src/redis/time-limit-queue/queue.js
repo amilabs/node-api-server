@@ -7,6 +7,10 @@ class DelayPeriod {
     }
 }
 
+const loggerStub = {
+    debug: console.log, info: console.log, error: console.log, warn: console.log
+};
+
 const GLOBAL_COUNTERS_KEY = 'global';
 
 class FailForce {}
@@ -52,11 +56,12 @@ class TimeLimitsQueue extends Queue {
         return Promise.all([
             this.globalLimit.getCounters(GLOBAL_COUNTERS_KEY),
             ...this.perJobLimits.map(async ({
-                timeCounter, getIdFunc, dropCondition, name }) => {
+                timeCounter, getIdFunc, dropCondition, name
+            }) => {
                 const id = getIdFunc(job);
                 return {
                     name,
-                    counters: await timeCounter.getCounterKey(id),
+                    counters: await timeCounter.getCounters(id),
                     id,
                     timeCounter,
                     dropCondition
@@ -71,7 +76,7 @@ class TimeLimitsQueue extends Queue {
     /**
      * @param job
      */
-    processCallbackWrapper(callback) {
+    processCallbackWrapper(callback, logger = loggerStub) {
         return async (job) => {
             const delays = await Promise.all(this.perJobLimits.map(async (
                 { timeCounter, getIdFunc, dropCondition }) => {
@@ -83,11 +88,13 @@ class TimeLimitsQueue extends Queue {
                     dropCondition
                 };
             }));
+            logger.debug('delays for job', { delays, jobData: job.data });
             const isDrop = Boolean(delays.filter(({ delay, dropCondition }) => delay > dropCondition).length);
             if (isDrop) {
                 delays
                     .filter(({ delay }) => delay === 0)
                     .forEach(({ timeCounter, id }) => timeCounter.decrementLast(id));
+                logger.debug('job is drop', { delays, jobData: job.data });
                 return Promise.reject(new FailForce());
             }
             const maxDelay = Math.max(...delays.map(({ delay }) => delay));
@@ -95,14 +102,16 @@ class TimeLimitsQueue extends Queue {
                 delays
                     .filter(({ delay }) => delay === 0)
                     .forEach(({ timeCounter, id }) => timeCounter.decrementLast(id));
+                logger.debug(`job is delayed to ${maxDelay}`, { delays, jobData: job.data });
                 return Promise.reject(new DelayPeriod(maxDelay * 1000));
             }
+            job.data.counters = await this.getAllCounters(job);
             return callback(job);
         };
     }
 
-    setProcessCallback(callback) {
-        super.setProcessCallback(this.processCallbackWrapper(callback));
+    setProcessCallback(callback, logger = loggerStub) {
+        return super.setProcessCallback(this.processCallbackWrapper(callback, logger));
     }
 
     process(...args) {
