@@ -92,8 +92,7 @@ class TimeCounters {
                     return limit - count;
                 }
                 return limit;
-            }), _.clone(this.limits))
-            .value();
+            }), _.clone(this.limits));
     }
 
     /**
