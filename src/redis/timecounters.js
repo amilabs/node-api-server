@@ -71,10 +71,11 @@ class TimeCounters {
         addToLimits.forEach(({ time, count }) => {
             newLimits[time] = count;
         });
-        return addToLimits;
+        return newLimits;
     }
 
-    async checkWithFutureIncrements(redisCounterKey) {
+    async checkWithFutureIncrements(key) {
+        const redisCounterKey = this.getCounterKey(key);
         const now = this.getNow();
         const counters = (await this.redisInstance.hgetallAsync(redisCounterKey)) || {};
         return Math.max(...Object.entries(this.makeFullLimits(this.limits)).map(([interval, limit]) => {
@@ -116,9 +117,13 @@ class TimeCounters {
         const now = this.getNow();
         const redisCountKey = this.getCounterKey(key);
         const counters = await this.redisInstance.hgetallAsync(redisCountKey);
+        console.log(counters, _(counters)
+            .toPairs()
+            .filter(([time]) => time <= now).value())
         return _(counters)
             .toPairs()
-            .reduce((results, [time, count]) => _.mapValues((limit, period) => {
+            .filter(([time]) => time <= now)
+            .reduce((results, [time, count]) => _.mapValues(results, (limit, period) => {
                 if (now - time < period) {
                     return limit - count;
                 }

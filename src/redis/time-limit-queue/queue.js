@@ -56,15 +56,13 @@ class TimeLimitsQueue extends Queue {
         return Promise.all([
             this.globalLimit.getCounters(GLOBAL_COUNTERS_KEY),
             ...this.perJobLimits.map(async ({
-                timeCounter, getIdFunc, dropCondition, name
+                timeCounter, getIdFunc, name
             }) => {
                 const id = getIdFunc(job);
                 return {
                     name,
                     counters: await timeCounter.getCounters(id),
-                    id,
-                    timeCounter,
-                    dropCondition
+                    id
                 };
             })
         ]).then(([global, ...perJobs]) => ({
@@ -104,7 +102,8 @@ class TimeLimitsQueue extends Queue {
     processCallbackWrapper(callback, logger = loggerStub) {
         return async (job) => {
             if (job.attemptsMade === 0) {
-                const { maxDelay, isDrop } = await this.getMaxDelay(job)
+                const { maxDelay, isDrop } = await this.getMaxDelay(job);
+
                 logger.debug('max delays for job', { maxDelay, isDrop, jobData: job.data });
                 if (isDrop) {
                     return Promise.reject(new FailForce());
