@@ -106,8 +106,8 @@ class TimeLimitsQueue extends Queue {
                 if (isDrop) {
                     return Promise.reject(new FailForce());
                 }
+                this.incrementAfterDelay(job,  maxDelay || 0);
                 if (maxDelay) {
-                    this.incrementAfterDelay(job, maxDelay);
                     return Promise.reject(new DelayPeriod(maxDelay * 1000));
                 }
             }
