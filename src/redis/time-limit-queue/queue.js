@@ -73,37 +73,43 @@ class TimeLimitsQueue extends Queue {
         }));
     }
 
+    async getMaxDelay(job) {
+        const delays = await Promise.all(this.perJobLimits.map(async (
+            { timeCounter, getIdFunc, dropCondition }) => {
+            const id = getIdFunc(job);
+            return {
+                delay: await timeCounter.checkWithFutureIncrements(id),
+                id,
+                timeCounter,
+                dropCondition
+            };
+        }));
+        const maxDelay = Math.max(...delays.map(({ delay }) => delay));
+        const isDrop = Boolean(delays.filter(({ delay, dropCondition }) => delay > dropCondition).length);
+        return { maxDelay, isDrop };
+    }
+
+    async incrementAfterDelay(job, delay) {
+        return Promise.all(this.perJobLimits.map(async ({ timeCounter, getIdFunc }) => {
+            return timeCounter.incrementKey(getIdFunc(job), timeCounter.getNow() + delay)
+        }));
+    }
+
     /**
      * @param job
      */
     processCallbackWrapper(callback, logger = loggerStub) {
         return async (job) => {
-            const delays = await Promise.all(this.perJobLimits.map(async (
-                { timeCounter, getIdFunc, dropCondition }) => {
-                const id = getIdFunc(job);
-                return {
-                    delay: await timeCounter.checkAndIncrement(id),
-                    id,
-                    timeCounter,
-                    dropCondition
-                };
-            }));
-            logger.debug('delays for job', { delays, jobData: job.data });
-            const isDrop = Boolean(delays.filter(({ delay, dropCondition }) => delay > dropCondition).length);
-            if (isDrop) {
-                delays
-                    .filter(({ delay }) => delay === 0)
-                    .forEach(({ timeCounter, id }) => timeCounter.decrementLast(id));
-                logger.debug('job is drop', { delays, jobData: job.data });
-                return Promise.reject(new FailForce());
-            }
-            const maxDelay = Math.max(...delays.map(({ delay }) => delay));
-            if (maxDelay) {
-                delays
-                    .filter(({ delay }) => delay === 0)
-                    .forEach(({ timeCounter, id }) => timeCounter.decrementLast(id));
-                logger.debug(`job is delayed to ${maxDelay}`, { delays, jobData: job.data });
-                return Promise.reject(new DelayPeriod(maxDelay * 1000));
+            if (job.attemptsMade === 0) {
+                const { maxDelay, isDrop } = await this.getMaxDelay(job)
+                logger.debug('max delays for job', { maxDelay, isDrop, jobData: job.data });
+                if (isDrop) {
+                    return Promise.reject(new FailForce());
+                }
+                if (maxDelay) {
+                    this.incrementAfterDelay(job, maxDelay);
+                    return Promise.reject(new DelayPeriod(maxDelay * 1000));
+                }
             }
             job.data.counters = await this.getAllCounters(job);
             return callback(job);

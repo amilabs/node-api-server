@@ -56,6 +56,37 @@ class TimeCounters {
         }));
     }
 
+    makeFullLimits(limits) {
+        const sortedLimits = _(limits)
+            .toPairs()
+            .map(([time, count]) => ({ time, count }))
+            .sort(({ time }) => time)
+            .value();
+        const addToLimits = [];
+        for (let i = 0; i < sortedLimits.length - 1; i++) {
+            addToLimits.push(..._.range(sortedLimits[i].count, sortedLimits[i + 1].count, sortedLimits[i].count)
+                .map((count, key) => ({ count, time: sortedLimits[i].time * (key + 2) })));
+        }
+        const newLimits = _.clone(limits);
+        addToLimits.forEach(({ time, count }) => {
+            newLimits[time] = count;
+        });
+        return addToLimits;
+    }
+
+    async checkWithFutureIncrements(redisCounterKey) {
+        const now = this.getNow();
+        const counters = (await this.redisInstance.hgetallAsync(redisCounterKey)) || {};
+        return Math.max(...Object.entries(this.makeFullLimits(this.limits)).map(([interval, limit]) => {
+            const countersForInterval = Object.entries(counters)
+                .filter(([time]) => now - time < interval);
+            if (countersForInterval.reduce((res, [, count]) => res - count, limit) < 1) {
+                return Math.min(...countersForInterval.map(([time]) => interval - (now - time)));
+            }
+            return 0;
+        }));
+    }
+
     /**
      *
      * @param key
