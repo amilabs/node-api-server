@@ -91,7 +91,10 @@ class TimeLimitsQueue extends Queue {
 
     async incrementAfterDelay(job, delay) {
         return Promise.all(this.perJobLimits.map(async ({ timeCounter, getIdFunc }) => {
-            return timeCounter.incrementKey(getIdFunc(job), timeCounter.getNow() + delay)
+            return timeCounter.incrementKey(
+                timeCounter.getCounterKey(getIdFunc(job)),
+                timeCounter.getNow() + delay
+            );
         }));
     }
 
@@ -106,7 +109,7 @@ class TimeLimitsQueue extends Queue {
                 if (isDrop) {
                     return Promise.reject(new FailForce());
                 }
-                this.incrementAfterDelay(job,  maxDelay || 0);
+                this.incrementAfterDelay(job, maxDelay || 0);
                 if (maxDelay) {
                     return Promise.reject(new DelayPeriod(maxDelay * 1000));
                 }
