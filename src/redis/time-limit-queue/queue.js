@@ -113,7 +113,9 @@ class TimeLimitsQueue extends Queue {
                     return Promise.reject(new DelayPeriod(maxDelay * 1000));
                 }
             }
+            const { maxDelay, isDrop } = await this.getMaxDelay(job);
             job.data.counters = await this.getAllCounters(job);
+            job.data.countersInfo = { maxDelay, isDrop };
             return callback(job);
         };
     }
