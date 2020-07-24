@@ -117,18 +117,25 @@ class TimeCounters {
         const now = this.getNow();
         const redisCountKey = this.getCounterKey(key);
         const counters = await this.redisInstance.hgetallAsync(redisCountKey);
-        console.log(counters, _(counters)
+        const delayCount = _(counters)
             .toPairs()
-            .filter(([time]) => time <= now).value())
-        return _(counters)
-            .toPairs()
-            .filter(([time]) => time <= now)
-            .reduce((results, [time, count]) => _.mapValues(results, (limit, period) => {
-                if (now - time < period) {
-                    return limit - count;
-                }
-                return limit;
-            }), _.clone(this.limits));
+            .filter(([time]) => time > now).value().length;
+        return {
+            ..._(counters)
+                .toPairs()
+                .filter(([time]) => time <= now)
+                .reduce((results, [time, count]) => _.mapValues(results, (limit, period) => {
+                    if (now - time < period) {
+                        return limit - count;
+                    }
+                    return limit;
+                }), _.clone(this.limits)),
+            delayCount
+        };
+    }
+
+    getLimits() {
+        return this.limits;
     }
 
     /**

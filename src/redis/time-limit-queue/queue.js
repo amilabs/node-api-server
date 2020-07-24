@@ -52,6 +52,22 @@ class TimeLimitsQueue extends Queue {
         });
     }
 
+    async getCounterById(counterName, id) {
+        const timeCounter = this.perJobLimits.filter(({ name }) => name === counterName)[0];
+        if (!timeCounter) {
+            return null;
+        }
+        return timeCounter.timeCounter.getCounters(id);
+    }
+
+    getLimits(counterName) {
+        const timeCounter = this.perJobLimits.filter(({ name }) => name === counterName)[0];
+        if (!timeCounter) {
+            return null;
+        }
+        return timeCounter.timeCounter.getLimits();
+    }
+
     async getAllCounters(job) {
         return Promise.all([
             this.globalLimit.getCounters(GLOBAL_COUNTERS_KEY),
@@ -62,6 +78,7 @@ class TimeLimitsQueue extends Queue {
                 return {
                     name,
                     counters: await timeCounter.getCounters(id),
+                    limits: timeCounter.getLimits(),
                     id
                 };
             })
@@ -103,8 +120,9 @@ class TimeLimitsQueue extends Queue {
         return async (job) => {
             if (job.attemptsMade === 0) {
                 const { maxDelay, isDrop } = await this.getMaxDelay(job);
-
-                logger.debug('max delays for job', { maxDelay, isDrop, jobData: job.data });
+                logger.debug('max delays for job', {
+                    maxDelay, isDrop, jobData: job.data, name: this.name
+                });
                 if (isDrop) {
                     return Promise.reject(new FailForce());
                 }
