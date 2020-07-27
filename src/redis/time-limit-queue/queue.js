@@ -35,6 +35,8 @@ class TimeLimitsQueue extends Queue {
          * @var TimeCounters[]
          */
         this.perJobLimits = limits.perJob;
+
+        this.logMessageCallback = () => {};
     }
 
     async add(job, opt) {
@@ -113,6 +115,13 @@ class TimeLimitsQueue extends Queue {
         }));
     }
 
+    setLogMessageCallback(callback) {
+        if (typeof callback !== 'function') {
+            throw Error('Callback type is not a function');
+        }
+        this.logMessageCallback = callback;
+    }
+
     /**
      * @param job
      */
@@ -121,6 +130,9 @@ class TimeLimitsQueue extends Queue {
             if (job.attemptsMade === 0) {
                 const { maxDelay, isDrop } = await this.getMaxDelay(job);
                 logger.debug('max delays for job', {
+                    maxDelay, isDrop, jobData: job.data, name: this.name
+                });
+                this.logMessageCallback({
                     maxDelay, isDrop, jobData: job.data, name: this.name
                 });
                 if (isDrop) {
