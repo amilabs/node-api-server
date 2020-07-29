@@ -67,8 +67,8 @@ class MongoCollection {
         return this.collection.aggregate(pipline, options).toArray();
     }
 
-    async find(selector, limit = 100, order = undefined, skip = 0) {
-        let cursor = this.collection.find(selector);
+    async find(selector, limit = 100, order = undefined, skip = 0, options = {}) {
+        let cursor = this.collection.find(selector, options);
         if (order) {
             cursor = cursor.sort(order);
         }
