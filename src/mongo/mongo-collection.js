@@ -54,8 +54,8 @@ class MongoCollection {
         return this.collection.insertOne(data);
     }
 
-    async findOne(selector) {
-        return this.collection.findOne(selector);
+    async findOne(selector, options = {}) {
+        return this.collection.findOne(selector, options);
     }
 
     async insertMany(data) {
