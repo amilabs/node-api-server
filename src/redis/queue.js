@@ -11,7 +11,14 @@ class Queue {
         };
         this.processCallback = options.processCallback ? options.processCallback.bind(this) : null;
         this.instance = new BullQueue(this.name, this.queueOptions);
+    }
+
+    start() {
         this.instance.process('__default__', this.concurency, job => this.process(job));
+    }
+
+    async getJobCounts() {
+        return this.instance.getJobCounts();
     }
 
     async stop() {

@@ -40,6 +40,10 @@ class MongoCollection {
         return this.insertOne(data);
     }
 
+    async findAndModify(query = {}, sort = { _id: 1 }, doc = {}, options = {}) {
+        return this.collection.findAndModify(query, sort, doc, options);
+    }
+
     async updateOne(selector, data) {
         this.validateData(data);
         return this.collection.updateOne(selector, { $set: data });
