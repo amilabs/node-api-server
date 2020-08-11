@@ -65,7 +65,7 @@ class TimeCounters {
         const addToLimits = [];
         for (let i = 0; i < sortedLimits.length - 1; i++) {
             addToLimits.push(..._.range(sortedLimits[i].count, sortedLimits[i + 1].count, sortedLimits[i].count)
-                .map((count, key) => ({ count, time: sortedLimits[i].time * (key + 2) })));
+                .map((count, key) => ({ count, time: sortedLimits[i].time * (key + 1) })));
         }
         const newLimits = _.clone(limits);
         addToLimits.forEach(({ time, count }) => {
@@ -79,8 +79,11 @@ class TimeCounters {
         const now = this.getNow();
         const counters = (await this.redisInstance.hgetallAsync(redisCounterKey)) || {};
         return Object.entries(this.makeFullLimits(this.limits)).map(([interval, limit]) => {
+            interval = parseInt(interval, 10);
+            limit = parseInt(limit, 10);
             const countersForInterval = Object.entries(counters)
-                .filter(([time]) => now - time < interval);
+                .filter(([time]) => now - time < interval)
+                .map(([time, count]) => [parseInt(time, 10), parseInt(count, 10)]);
             if (countersForInterval.reduce((res, [, count]) => res - count, limit) < 1) {
                 return {
                     interval,
@@ -89,11 +92,11 @@ class TimeCounters {
             }
             return 0;
         }).reduce((max, val) => {
-            if (val.interval > max.interval) {
+            if (val.delay > max.delay) {
                 return val;
             }
             return max;
-        }, { interval: 0 });
+        }, { interval: 0, delay: 0 });
     }
 
     /**
