@@ -1,7 +1,7 @@
 const { fromPairs } = require('lodash');
 
 async function delayer(delay) {
-    return Promise((resolve) => {
+    return new Promise((resolve) => {
         setTimeout(resolve, delay);
     });
 }

@@ -5,7 +5,7 @@ class DelayPeriod {
     constructor(delay) {
         this.delay = delay;
     }
-}
+};
 
 const loggerStub = {
     debug: console.log, info: console.log, error: console.log, warn: console.log
@@ -92,27 +92,27 @@ class TimeLimitsQueue extends Queue {
 
     async getMaxDelay(job) {
         const delays = await Promise.all(this.perJobLimits.map(async (
-            { timeCounter, getIdFunc, dropCondition }) => {
+            { timeCounter, getIdFunc, dropInterval }) => {
             const id = getIdFunc(job);
+            const { delay, interval } = await timeCounter.checkWithFutureIncrements(id);
             return {
-                delay: await timeCounter.checkWithFutureIncrements(id),
+                delay,
+                interval,
                 id,
                 timeCounter,
-                dropCondition
+                dropInterval
             };
         }));
         const maxDelay = Math.max(...delays.map(({ delay }) => delay));
-        const isDrop = Boolean(delays.filter(({ delay, dropCondition }) => delay > dropCondition).length);
+        const isDrop = Boolean(delays.filter(({ interval, dropInterval }) => interval >= dropInterval).length);
         return { maxDelay, isDrop };
     }
 
     async incrementAfterDelay(job, delay) {
-        return Promise.all(this.perJobLimits.map(async ({ timeCounter, getIdFunc }) => {
-            return timeCounter.incrementKey(
-                timeCounter.getCounterKey(getIdFunc(job)),
-                timeCounter.getNow() + delay
-            );
-        }));
+        return Promise.all(this.perJobLimits.map(async ({ timeCounter, getIdFunc }) => timeCounter.incrementKey(
+            timeCounter.getCounterKey(getIdFunc(job)),
+            timeCounter.getNow() + delay
+        )));
     }
 
     setLogMessageCallback(callback) {
