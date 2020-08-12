@@ -5,7 +5,7 @@ class DelayPeriod {
     constructor(delay) {
         this.delay = delay;
     }
-};
+}
 
 const loggerStub = {
     debug: console.log, info: console.log, error: console.log, warn: console.log

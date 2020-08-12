@@ -91,12 +91,10 @@ class TimeCounters {
                 };
             }
             return 0;
-        }).reduce((max, val) => {
-            if (val.delay > max.delay) {
-                return val;
-            }
-            return max;
-        }, { interval: 0, delay: 0 });
+        }).reduce((max, val) => ({
+            delay: Math.max(val.delay, max.delay),
+            interval: Math.max(val.interval, max.interval)
+        }), { interval: 0, delay: 0 });
     }
 
     /**
