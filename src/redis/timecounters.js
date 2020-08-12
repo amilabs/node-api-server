@@ -90,8 +90,8 @@ class TimeCounters {
                     delay: Math.min(...countersForInterval.map(([time]) => interval - (now - time)))
                 };
             }
-            return 0;
-        }).reduce((max, val) => ({
+            return null;
+        }).filter(delayObj => delayObj).reduce((max, val) => ({
             delay: Math.max(val.delay, max.delay),
             interval: Math.max(val.interval, max.interval)
         }), { interval: 0, delay: 0 });
