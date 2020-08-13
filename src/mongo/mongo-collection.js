@@ -53,6 +53,10 @@ class MongoCollection {
         return this.collection.updateMany(selector, updateOperator);
     }
 
+    async remove(selector) {
+        return this.collection.remove(selector);
+    }
+
     async insertOne(data) {
         this.validateData(data);
         return this.collection.insertOne(data);

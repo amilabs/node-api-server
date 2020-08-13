@@ -13,6 +13,7 @@ const metricMethodList = [
     'updateOne',
     'insertOne',
     'insertMany',
+    'findAndModify',
     'find',
     'aggregate',
     'count',
@@ -28,7 +29,8 @@ const logMethodList = {
     count: 'debug',
     insertOne: 'debug',
     find: 'debug',
-    upsertMany: 'debug'
+    upsertMany: 'debug',
+    findAndModify: 'debug'
 };
 
 function uriToMetricPath(uri) {

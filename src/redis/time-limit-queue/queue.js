@@ -42,7 +42,13 @@ class TimeLimitsQueue extends Queue {
     async add(job, opt) {
         const delay = await this.globalLimit.checkAndIncrement(GLOBAL_COUNTERS_KEY);
         if (delay) {
-            return this.delayQueue(delay * 1000);
+            if (this.logMessageCallback) {
+                this.logMessageCallback({
+                    isGlobalPause: true,
+                    pauseInterval: delay
+                });
+            }
+            await this.delayQueue(delay * 1000);
         }
 
         return super.add(job, {
@@ -132,9 +138,11 @@ class TimeLimitsQueue extends Queue {
                 logger.debug('max delays for job', {
                     maxDelay, isDrop, jobData: job.data, name: this.name
                 });
-                this.logMessageCallback({
-                    maxDelay, isDrop, jobData: job.data, name: this.name
-                });
+                if (this.logMessageCallback) {
+                    this.logMessageCallback({
+                        maxDelay, isDrop, jobData: job.data, name: this.name
+                    });
+                }
                 if (isDrop) {
                     return Promise.reject(new FailForce());
                 }
