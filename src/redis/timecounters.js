@@ -39,7 +39,8 @@ class TimeCounters {
     async incrementKey(key, time, count = 1) {
         return Promise.all([
             this.redisInstance.hincrbyAsync(key, time, count),
-            this.redisInstance.expireAsync(key, this.expireKeyTime)
+            this.redisInstance.expireAsync(key, this.expireKeyTime),
+            this._rollupKey(key)
         ]);
     }
 
