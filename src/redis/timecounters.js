@@ -40,7 +40,7 @@ class TimeCounters {
         return Promise.all([
             this.redisInstance.hincrbyAsync(key, time, count),
             this.redisInstance.expireAsync(key, this.expireKeyTime),
-            this._rollupKey(key)
+            this._rollupKey(key, true)
         ]);
     }
 
@@ -77,6 +77,7 @@ class TimeCounters {
 
     async checkWithFutureIncrements(key) {
         const redisCounterKey = this.getCounterKey(key);
+        await this._rollupKey(key);
         const now = this.getNow();
         const counters = (await this.redisInstance.hgetallAsync(redisCounterKey)) || {};
         return Object.entries(this.makeFullLimits(this.limits)).map(([interval, limit]) => {
@@ -105,8 +106,8 @@ class TimeCounters {
      */
     async checkAndIncrement(key) {
         const now = this.getNow();
-        await this._rollupKey(key);
         const redisCounterKey = this.getCounterKey(key);
+        await this._rollupKey(key);
         let overflowConst = 1;
         if (this.isIncrementFirst) {
             overflowConst = 0;
@@ -165,9 +166,9 @@ class TimeCounters {
         }
     }
 
-    async _rollupKey(key) {
+    async _rollupKey(key, isRedisKey = true) {
         const now = this.getNow();
-        const redisCountKey = this.getCounterKey(key);
+        const redisCountKey = isRedisKey ? key : this.getCounterKey(key);
         const counters = await this.redisInstance.hgetallAsync(redisCountKey);
         const groupedCounter = _(counters)
             .toPairs()
