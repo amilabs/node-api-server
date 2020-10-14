@@ -166,7 +166,7 @@ class TimeCounters {
         }
     }
 
-    async _rollupKey(key, isRedisKey = true) {
+    async _rollupKey(key, isRedisKey = false) {
         const now = this.getNow();
         const redisCountKey = isRedisKey ? key : this.getCounterKey(key);
         const counters = await this.redisInstance.hgetallAsync(redisCountKey);
