@@ -135,6 +135,8 @@ class TimeLimitsQueue extends Queue {
         return async (job) => {
             if (job.attemptsMade === 0) {
                 const { maxDelay, isDrop } = await this.getMaxDelay(job);
+                job.data.counters = await this.getAllCounters(job);
+                job.data.countersInfo = { maxDelay, isDrop };
                 logger.debug('max delays for job', {
                     maxDelay, isDrop, jobData: job.data, name: this.name
                 });
