@@ -1,5 +1,5 @@
 {
-  "name": "api-server",
+  "name": "@amilabs/api-server",
   "version": "1.10.0",
   "description": "",
   "main": "index.js",
