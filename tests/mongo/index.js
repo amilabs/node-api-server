@@ -48,17 +48,15 @@ class MongoCollectionDumb {
         this.insertManyCnt++;
         return this.insertManyFunc(...args);
     }
-
 }
 
 
-describe('MongoCollection', function() {
-
-    describe('constructor', function() {
+describe('MongoCollection', () => {
+    describe('constructor', () => {
         it('should throw error on invalid schema', () => {
             let error;
             try {
-                new MongoCollection({}, {type: 123})
+                new MongoCollection({}, { type: 123 });
             } catch (e) {
                 error = e;
             }
@@ -66,17 +64,17 @@ describe('MongoCollection', function() {
         });
 
         it('should create validator with single validator on fields', () => {
-            let mongo = new MongoCollection({}, schema)
+            const mongo = new MongoCollection({}, schema)
             assert.equal(mongo instanceof MongoCollection, true);
         });
 
     });
 
-    describe('upsert', function() {
+    describe('upsert', () => {
         it('should call only insertOne if unique keys is empty', async () => {
             const collection = new MongoCollectionDumb();
             const mongoCollection = new MongoCollection(collection, schema);
-            await mongoCollection.upsert({fieldString: "str", fieldNumber: 123})
+            await mongoCollection.upsert({ fieldString: 'str', fieldNumber: 123 })
             assert.equal(collection.insertOneCnt, 1);
             assert.equal(collection.insertManyCnt, 0);
             assert.equal(collection.updateOneCnt, 0);
@@ -91,7 +89,7 @@ describe('MongoCollection', function() {
                 }, selector);
                 return { fieldNumber: 123, fieldString: "str1" };
             };
-            const mongoCollection = new MongoCollection(collection, schema, { uniqueKeys: ['fieldNumber'] } );
+            const mongoCollection = new MongoCollection(collection, schema, { uniqueKeys: ['fieldNumber'] });
             await mongoCollection.upsert({fieldString: "str", fieldNumber: 123});
             assert.equal(collection.findOneCnt, 1);
             assert.equal(collection.updateOneCnt, 1);

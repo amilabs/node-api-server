@@ -40,6 +40,10 @@ class MongoCollection {
         return this.insertOne(data);
     }
 
+    async findAndModify(query = {}, sort = { _id: 1 }, doc = {}, options = {}) {
+        return this.collection.findAndModify(query, sort, doc, options);
+    }
+
     async updateOne(selector, data) {
         this.validateData(data);
         return this.collection.updateOne(selector, { $set: data });
@@ -49,13 +53,17 @@ class MongoCollection {
         return this.collection.updateMany(selector, updateOperator);
     }
 
+    async remove(selector) {
+        return this.collection.remove(selector);
+    }
+
     async insertOne(data) {
         this.validateData(data);
         return this.collection.insertOne(data);
     }
 
-    async findOne(selector) {
-        return this.collection.findOne(selector);
+    async findOne(selector, options = {}) {
+        return this.collection.findOne(selector, options);
     }
 
     async insertMany(data) {
@@ -63,12 +71,12 @@ class MongoCollection {
         return this.collection.insertMany(data);
     }
 
-    async aggregate(pipline) {
-        return this.collection.aggregate(pipline).toArray();
+    async aggregate(pipline, options = {}) {
+        return this.collection.aggregate(pipline, options).toArray();
     }
 
-    async find(selector, limit = 100, order = undefined, skip = 0) {
-        let cursor = this.collection.find(selector);
+    async find(selector, limit = 100, order = undefined, skip = 0, options = {}) {
+        let cursor = this.collection.find(selector, options);
         if (order) {
             cursor = cursor.sort(order);
         }

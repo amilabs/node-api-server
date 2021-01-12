@@ -1,7 +1,7 @@
 const { fromPairs } = require('lodash');
 
 async function delayer(delay) {
-    return Promise((resolve) => {
+    return new Promise((resolve) => {
         setTimeout(resolve, delay);
     });
 }
@@ -13,6 +13,7 @@ const metricMethodList = [
     'updateOne',
     'insertOne',
     'insertMany',
+    'findAndModify',
     'find',
     'aggregate',
     'count',
@@ -28,7 +29,8 @@ const logMethodList = {
     count: 'debug',
     insertOne: 'debug',
     find: 'debug',
-    upsertMany: 'debug'
+    upsertMany: 'debug',
+    findAndModify: 'debug'
 };
 
 function uriToMetricPath(uri) {
@@ -50,7 +52,13 @@ function inurlParams(inurlPath = 'inurl') {
     };
 }
 
-// TODO rederect ip add here
+function inqueryParams(inqueryPath = 'inquery') {
+    return (req) => {
+        req.body = { ...req.body, [inqueryPath]: req.query || {} };
+    };
+}
+
+// TODO redirect ip add here
 function ipToParams(ipPath = 'ip') {
     return (req) => {
         req.body = { ...req.body, [ipPath]: req.ip };
@@ -76,6 +84,7 @@ module.exports = {
     inurlParams,
     headerToParams,
     ipToParams,
+    inqueryParams,
     camelCaseToKebab,
     metricMethodList,
     logMethodList

@@ -1,3 +1,8 @@
+const { TimeCounters } = require('./timecounters');
+const { Queue } = require('./queue');
+const { TimeLimitsQueue } = require('./time-limit-queue/queue');
+
+
 const { mapValues } = require('lodash');
 const redis = require('redis');
 const bluebird = require('bluebird');
@@ -13,4 +18,10 @@ function initMultiRedis(redisList) {
     return mapValues(redisList, params => initRedis(params));
 }
 
-module.exports = { initRedis, initMultiRedis };
+module.exports = {
+    initRedis,
+    initMultiRedis,
+    TimeLimitsQueue,
+    TimeCounters,
+    Queue
+};
