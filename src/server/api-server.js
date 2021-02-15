@@ -125,7 +125,7 @@ class ApiServer {
             sentry.init({
                 dsn: this.config.sentry.url,
                 environment: this.config.sentry.environment,
-                release: process.env.VERSION
+                release: this.config.sentry.version
             });
             this.app.use(sentry.Handlers.errorHandler());
         }
