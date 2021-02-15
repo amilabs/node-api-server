@@ -121,8 +121,12 @@ class ApiServer {
             this.logger.logEvent(server, httpServerLogEvent);
         }
         this.app = server;
-        if (this.config.sentryUrl) {
-            sentry.init({ dsn: this.config.sentryUrl });
+        if (this.config.sentry) {
+            sentry.init({
+                dsn: this.config.sentry.url,
+                environment: this.config.sentry.environment,
+                release: process.env.VERSION
+            });
             this.app.use(sentry.Handlers.errorHandler());
         }
         return server;
