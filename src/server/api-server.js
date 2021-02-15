@@ -1,5 +1,5 @@
 const express = require('express');
-import * as Sentry from '@sentry/node';
+const sentry = require('@sentry/node');
 const createMiddleware = require('swagger-express-middleware');
 const _ = require('lodash');
 const uuid4 = require('uuid/v4');
@@ -122,8 +122,8 @@ class ApiServer {
         }
         this.app = server;
         if (this.config.sentryUrl) {
-            Sentry.init({ dsn: this.config.sentryUrl });
-            this.app.use(Sentry.Handlers.errorHandler());
+            sentry.init({ dsn: this.config.sentryUrl });
+            this.app.use(sentry.Handlers.errorHandler());
         }
         return server;
     }
