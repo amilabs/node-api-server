@@ -141,7 +141,6 @@ class ApiServer {
                         return reject(err);
                     }
                     this.swaggerMiddlewares = middleware;
-                    if (this.config.sentry) this.app.use(sentry.Handlers.errorHandler());
                     return resolve(this.swaggerMiddlewares);
                 });
             } catch (e) {
@@ -313,6 +312,7 @@ class ApiServer {
     async start(port, host = '0.0.0.0') {
         this.logger.info('starting server...');
         const res = await this.beforeStart();
+        if (this.config.sentry) this.app.use(sentry.Handlers.errorHandler());
         this.logger.debug('in start', res);
         writeSingleMetric(`service.${process.pid}.start`, 1);
         return new Promise((resolve, reject) => {
