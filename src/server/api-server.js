@@ -127,7 +127,7 @@ class ApiServer {
                 environment: this.config.sentry.environment,
                 release: this.config.sentry.version
             });
-            this.app.use(sentry.Handlers.errorHandler());
+            this.app.use(sentry.Handlers.requestHandler());
         }
         return server;
     }
@@ -141,6 +141,7 @@ class ApiServer {
                         return reject(err);
                     }
                     this.swaggerMiddlewares = middleware;
+                    if (this.config.sentry) this.app.use(sentry.Handlers.errorHandler());
                     return resolve(this.swaggerMiddlewares);
                 });
             } catch (e) {
