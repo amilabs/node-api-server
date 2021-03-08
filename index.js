@@ -4,9 +4,9 @@ const mongo = require('./src/mongo');
 const redis = require('./src/redis');
 const utils = require('./src/utils');
 const { HttpClient } = require('./src/http-client');
-const metric = require('@timophey01/metric');
+const metric = require('@amilabs/metric');
 const cli = require('./src/cli');
-const { initLogger } = require('@timophey01/logger');
+const { initLogger } = require('@amilabs/logger');
 
 
 module.exports = {

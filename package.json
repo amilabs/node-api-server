@@ -1,6 +1,6 @@
 {
-  "name": "api-server",
-  "version": "1.10.0",
+  "name": "@amilabs/api-server",
+  "version": "1.10.10",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -19,8 +19,9 @@
   },
   "homepage": "https://github.com/amilabs/node-api-server#readme",
   "dependencies": {
-    "@timophey01/logger": "1.0.1",
-    "@timophey01/metric": "1.1.0",
+    "@amilabs/logger": "1.0.1",
+    "@amilabs/metric": "1.1.0",
+    "@sentry/node": "^5.20.0",
     "agentkeepalive": "4.1.2",
     "ajv": "6.10.2",
     "bluebird": "3.7.2",

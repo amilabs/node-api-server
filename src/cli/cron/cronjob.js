@@ -1,7 +1,7 @@
 const lockFile = require('lockfile');
 const os = require('os');
-const { initLogger } = require('@timophey01/logger');
-const { initMetric, getStartedTimer } = require('@timophey01/metric');
+const { initLogger } = require('@amilabs/logger');
+const { initMetric, getStartedTimer } = require('@amilabs/metric');
 
 const DEFAULT_LOCK_RETRY_COUNT = 3;
 

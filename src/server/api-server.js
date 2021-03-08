@@ -1,16 +1,17 @@
 const express = require('express');
+const sentry = require('@sentry/node');
 const createMiddleware = require('swagger-express-middleware');
 const _ = require('lodash');
 const uuid4 = require('uuid/v4');
 const cors = require('cors');
-const { writeTime, writeSingleMetric } = require('@timophey01/metric');
+const { writeTime, writeSingleMetric } = require('@amilabs/metric');
 const { Validator } = require('../validators/validator');
 const { getMetricPathREST, camelCaseToKebab } = require('../utils');
 const ValidationError = require('../validators/error');
 const ResourceUnavailableError = require('./resource-error');
 const MongoValidationError = require('../mongo/errors/validation');
 const { mongoInit } = require('../mongo/mongo-init');
-const { initMetric } = require('@timophey01/metric');
+const { initMetric } = require('@amilabs/metric');
 
 const httpServerLogEvent = {
     close: 'info',
@@ -120,6 +121,14 @@ class ApiServer {
             this.logger.logEvent(server, httpServerLogEvent);
         }
         this.app = server;
+        if (this.config.sentry) {
+            sentry.init({
+                dsn: this.config.sentry.url,
+                environment: this.config.sentry.environment,
+                release: this.config.sentry.version
+            });
+            this.app.use(sentry.Handlers.requestHandler());
+        }
         return server;
     }
 
@@ -303,6 +312,7 @@ class ApiServer {
     async start(port, host = '0.0.0.0') {
         this.logger.info('starting server...');
         const res = await this.beforeStart();
+        if (this.config.sentry) this.app.use(sentry.Handlers.errorHandler());
         this.logger.debug('in start', res);
         writeSingleMetric(`service.${process.pid}.start`, 1);
         return new Promise((resolve, reject) => {
