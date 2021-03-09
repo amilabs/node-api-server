@@ -36,12 +36,31 @@ class TimeCounters {
         return `${this.prefix}:counters:${key}`;
     }
 
+    getBlockedKey(key) {
+        return `${this.prefix}:is_block:${key}`;
+    }
+
     async incrementKey(key, time, count = 1) {
         return Promise.all([
             this.redisInstance.hincrbyAsync(key, time, count),
             this.redisInstance.expireAsync(key, this.expireKeyTime),
             this._rollupKey(key, true)
         ]);
+    }
+
+    async setBlock(key, blockingTime) {
+        const blockKey = this.getBlockedKey(key);
+        console.log(`setBlock ${blockKey} ${blockingTime}, ${key}`);
+        return this.redisInstance.setexAsync(blockKey, blockingTime, 'ok');
+    }
+
+    async checkBlock(key) {
+        const blockKey = this.getBlockedKey(key);
+        console.log(`checkBlock ${blockKey}`);
+        return Promise.all([
+            this.redisInstance.getAsync(blockKey).then(Boolean),
+            this.redisInstance.ttlAsync(blockKey),
+        ]).then(([isDrop, maxDelay]) => ({ isDrop, maxDelay }));
     }
 
     async check(redisCounterKey, overflowConst = 0) {

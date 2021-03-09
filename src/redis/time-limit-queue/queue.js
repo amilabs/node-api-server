@@ -11,6 +11,8 @@ const loggerStub = {
     debug: console.log, info: console.log, error: console.log, warn: console.log
 };
 
+const DROP_KEY_PREFIX = ''
+
 const GLOBAL_COUNTERS_KEY = 'global';
 
 class FailForce {}
@@ -97,8 +99,18 @@ class TimeLimitsQueue extends Queue {
     }
 
     async getMaxDelay(job) {
+        const dropObj = (await Promise.all(this.perJobLimits.map(async (
+            { timeCounter, getIdFunc }
+        ) => {
+            const id = getIdFunc(job);
+            return timeCounter.checkBlock(id);
+        }))).filter(({ isDrop }) => isDrop);
+        if (dropObj.length) {
+            console.log(dropObj[0]);
+            return dropObj[0];
+        }
         const delays = await Promise.all(this.perJobLimits.map(async (
-            { timeCounter, getIdFunc, dropInterval }) => {
+            { timeCounter, getIdFunc, dropInterval, blockInterval }) => {
             const id = getIdFunc(job);
             const { delay, interval } = await timeCounter.checkWithFutureIncrements(id);
             return {
@@ -106,11 +118,15 @@ class TimeLimitsQueue extends Queue {
                 interval,
                 id,
                 timeCounter,
-                dropInterval
+                dropInterval,
+                blockInterval
             };
         }));
         const maxDelay = Math.max(...delays.map(({ delay }) => delay));
-        const isDrop = Boolean(delays.filter(({ interval, dropInterval }) => interval >= dropInterval).length);
+        const dropDelay = delays.filter(({ interval, dropInterval }) => interval >= dropInterval);
+        const isDrop = Boolean(dropDelay.length);
+        await Promise.all(dropDelay.map(({ timeCounter, id, blockInterval, dropInterval }) =>
+            timeCounter.setBlock(id, blockInterval || dropInterval)));
         return { maxDelay, isDrop };
     }
 
