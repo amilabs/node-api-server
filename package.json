@@ -1,6 +1,6 @@
 {
   "name": "@timophey01/api-server",
-  "version": "1.10.10",
+  "version": "1.10.12",
   "description": "",
   "main": "index.js",
   "scripts": {
