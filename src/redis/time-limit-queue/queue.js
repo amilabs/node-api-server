@@ -106,7 +106,6 @@ class TimeLimitsQueue extends Queue {
             return timeCounter.checkBlock(id);
         }))).filter(({ isDrop }) => isDrop);
         if (dropObj.length) {
-            console.log(dropObj[0]);
             return dropObj[0];
         }
         const delays = await Promise.all(this.perJobLimits.map(async (
@@ -122,9 +121,13 @@ class TimeLimitsQueue extends Queue {
                 blockInterval
             };
         }));
-        const maxDelay = Math.max(...delays.map(({ delay }) => delay));
         const dropDelay = delays.filter(({ interval, dropInterval }) => interval >= dropInterval);
         const isDrop = Boolean(dropDelay.length);
+        const maxDelay = Math.max(...[
+            ...delays.map(({ delay }) => delay),
+            ...dropDelay.map(({ blockInterval }) => blockInterval)
+        ]);
+
         await Promise.all(dropDelay.map(({ timeCounter, id, blockInterval, dropInterval }) =>
             timeCounter.setBlock(id, blockInterval || dropInterval)));
         return { maxDelay, isDrop };
