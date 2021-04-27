@@ -35,7 +35,7 @@
     "lodash": "4.17.15",
     "mongodb": "3.3.3",
     "optimist": "0.6.1",
-    "redis": "2.8.0",
+    "redis": "3.1.1",
     "swagger-express-middleware": "2.0.3",
     "uuid": "3.3.3"
   },
